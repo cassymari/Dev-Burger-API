@@ -6,6 +6,7 @@ import app from "./app.js";
 import "./database/index.js";
 
 const PORT = process.env.PORT || 3001;
+console.log("MONGO_URL:", process.env.MONGO_URL);
 
 app.listen(PORT, () => {
   console.log(`Application is running at port ${PORT}`);
