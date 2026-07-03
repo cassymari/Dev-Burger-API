@@ -22,7 +22,7 @@ class Database {
     }
 
     mongo(){
-        this.mongooseConnection = mongoose.connect(process.env.MONGODB_URL)
+        this.mongooseConnection = mongoose.connect(process.env.MONGO_URL)
     }
 }
 
