@@ -9,7 +9,7 @@ class Category extends Model {
         URL:{
                   type: Sequelize.VIRTUAL,
                   get(){
-                    return `http://localhost:3001/category-file/${this.path}`
+                    return `https://dev-burger-api-1-9g81.onrender.com${this.path}`
                   },
                 },
 
