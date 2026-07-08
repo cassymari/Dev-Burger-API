@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
   "dev": "node --watch src/server.js",
-  "start": "node src/server.js"
+  "start": "node src/server.js",
+  "migrate": "sequelize --config src/config/database.cjs --migrations-path src/database/migrations db:migrate"
 },
   "keywords": [],
   "author": "",
