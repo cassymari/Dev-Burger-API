@@ -16,10 +16,23 @@ class Database {
         this.mongo();
     }
 
-    init(){
-        this.connection = new Sequelize(databaseConfig)
-        models.map((model) => model.init(this.connection)).map(model => model.associate && model.associate(this.connection.models));
-    }
+   async init() {
+  this.connection = new Sequelize(databaseConfig);
+
+  try {
+    await this.connection.authenticate();
+    console.log("✅ PostgreSQL conectado com sucesso!");
+  } catch (error) {
+    console.error("❌ Erro ao conectar ao PostgreSQL:");
+    console.error(error);
+  }
+
+  models
+    .map((model) => model.init(this.connection))
+    .map(
+      (model) => model.associate && model.associate(this.connection.models)
+    );
+}
 
     mongo(){
         this.mongooseConnection = mongoose.connect(process.env.MONGO_URL)

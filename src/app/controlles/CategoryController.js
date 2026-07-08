@@ -7,7 +7,7 @@ class CategoryController {
   async store(request, response) {
     const schema = Yup.object({
       name: Yup.string().required(),
-      
+
     });
 
     try {
@@ -20,37 +20,37 @@ class CategoryController {
       });
     }
 
-    
+
 
     const { name } = request.body;
-    const {filename } = request.file;
+    const { filename } = request.file;
 
     const existingCategory = await Category.findOne({
-      where:{
+      where: {
         name,
-      
+
       }
     })
 
-    if(existingCategory){
-      return response.status(400).json({ error: 'category already exists'});
+    if (existingCategory) {
+      return response.status(400).json({ error: 'category already exists' });
     }
 
-   
 
-   await Category.create({
+
+    await Category.create({
       name,
       path: filename,
-    
+
     });
 
     return response.status(201).json();
   }
 
-    async update(request, response) {
+  async update(request, response) {
     const schema = Yup.object({
       name: Yup.string(),
-      
+
     });
 
     try {
@@ -63,36 +63,38 @@ class CategoryController {
       });
     }
 
-    
+
 
     const { name } = request.body;
     const { id } = request.params;
 
+    const category = await Category.findByPk(id);
+
     let path = category.path;
-    if(request.file){
-       const {filename } = request.file;
+    if (request.file) {
+      const { filename } = request.file;
       path = filename;
     }
-   
+
     const existingCategory = await Category.findOne({
-      where:{
+      where: {
         name,
-      
+
       }
     })
 
-    if(existingCategory){
-      return response.status(400).json({ error: 'category already exists'});
+    if (existingCategory) {
+      return response.status(400).json({ error: 'category already exists' });
     }
 
-   
 
-   await Category.update({
+
+    await Category.update({
       name,
       path,
-    
+
     }, {
-      where:{
+      where: {
         id
       }
     });
@@ -101,19 +103,19 @@ class CategoryController {
   }
 
   async index(_request, response) {
-  try {
-    const categories = await Category.findAll();
+    try {
+      const categories = await Category.findAll();
 
-    return response.status(200).json(categories);
-  } catch (error) {
-    console.error("ERRO CATEGORY:");
-    console.error(error);
+      return response.status(200).json(categories);
+    } catch (error) {
+      console.error("ERRO CATEGORY:");
+      console.error(error);
 
-    return response.status(500).json({
-      message: error.message,
-    });
+      return response.status(500).json({
+        message: error.message,
+      });
+    }
   }
-}
 }
 
 
