@@ -100,11 +100,20 @@ class CategoryController {
     return response.status(201).json();
   }
 
-  async index(_request, response){
-    const categories = await Category.findAll()
+  async index(_request, response) {
+  try {
+    const categories = await Category.findAll();
 
-    return response.status(200).json(categories)
+    return response.status(200).json(categories);
+  } catch (error) {
+    console.error("ERRO CATEGORY:");
+    console.error(error);
+
+    return response.status(500).json({
+      message: error.message,
+    });
   }
+}
 }
 
 

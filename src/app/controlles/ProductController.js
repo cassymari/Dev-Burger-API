@@ -92,23 +92,33 @@ class ProductController {
 
 
 
-  async index( request, response) {
-const {active} = request.query;
+ async index(request, response) {
+  try {
+    const { active } = request.query;
 
-const products = await Products.findAll({
-  where: {
-    // biome-ignore lint/complexity/noUselessTernary: <explanation>
-    active: active === 'false' ? false : true,
-  },
-  include: {
-    model: Category,
-    as: 'category',
-    attributes: ['id', 'name'],
-  }
-})
+    const products = await Products.findAll({
+      where: {
+        active: active === "false" ? false : true,
+      },
+      include: {
+        model: Category,
+        as: "category",
+        attributes: ["id", "name"],
+      },
+    });
 
-response.json(products);
+    return response.json(products);
+  } catch (error) {
+    console.error("ERRO PRODUCT:");
+    console.error(error);
+
+    return response.status(500).json({
+      message: error.message,
+    });
   }
+}
+
+
 
   async delete(req, res) {
     const { id } = req.params;
