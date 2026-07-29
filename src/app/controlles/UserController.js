@@ -13,36 +13,47 @@ import bcrypt from 'bcrypt';
 
 class UserController {
   async store(request, response) {
-    const shema = Yup.object({
+    const schema = Yup.object({
       name: Yup.string().required(),
       email: Yup.string().email().required(),
       password: Yup.string().min(6).required(),
-      admin: Yup.boolean(),
     });
+
     try {
-      shema.validateSync(request.body, { abordEarly: false, strict: true });
-    } catch (err) {
-      return response.status(400).json({ error: err.erros });
+      schema.validateSync(request.body, {
+        abortEarly: false,
+        strict: true,
+      });
+    } catch (error) {
+      return response.status(400).json({
+        error: error.errors,
+      });
     }
 
     try {
-      const { name, email, password, admin } = request.body;
+      const { name, email, password } = request.body;
+
+      const normalizedEmail = email.trim().toLowerCase();
+
       const existingUser = await User.findOne({
         where: {
-          email,
+          email: normalizedEmail,
         },
       });
+
       if (existingUser) {
-        return response.status(400).json({ message: 'Email already taken!' });
+        return response.status(400).json({
+          message: 'Este e-mail já está cadastrado.',
+        });
       }
 
       const password_hash = await bcrypt.hash(password, 10);
 
       const user = await User.create({
         name,
-        email,
+        email: normalizedEmail,
         password_hash,
-        admin,
+        admin: false,
       });
 
       return response.status(201).json({
@@ -52,16 +63,10 @@ class UserController {
         admin: user.admin,
       });
     } catch (error) {
-      console.log('ERRO COMPLETO =>');
-      console.log(error);
-      console.log(error.parent);
-      console.log(error.original);
+      console.error('Erro ao cadastrar usuário:', error);
 
       return response.status(500).json({
-        name: error.name,
-        message: error.message,
-        parent: error.parent,
-        original: error.original,
+        message: 'Não foi possível cadastrar o usuário.',
       });
     }
   }

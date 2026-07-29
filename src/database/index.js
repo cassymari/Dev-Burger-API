@@ -17,7 +17,10 @@ class Database {
     }
 
    async init() {
-  this.connection = new Sequelize(databaseConfig);
+ this.connection = new Sequelize(
+  process.env.DATABASE_URL,
+  databaseConfig,
+);
 
   try {
     await this.connection.authenticate();
@@ -34,9 +37,19 @@ class Database {
     );
 }
 
-    mongo(){
-        this.mongooseConnection = mongoose.connect(process.env.MONGO_URL)
-    }
+   mongo() {
+  if (!process.env.MONGO_URL) {
+    console.warn(
+      'MONGO_URL não configurada. MongoDB desativado no ambiente local.',
+    );
+
+    return;
+  }
+
+  this.mongoConnection = mongoose.connect(
+    process.env.MONGO_URL,
+  );
+}
 }
 
 export default new Database();

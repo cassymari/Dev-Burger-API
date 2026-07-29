@@ -14,6 +14,8 @@ class User extends Model {
         email: Sequelize.STRING,
         password_hash: Sequelize.STRING,
         admin: Sequelize.BOOLEAN,
+        reset_password_token: Sequelize.STRING,
+        reset_password_expires: Sequelize.DATE,
       },
       {
         sequelize,
@@ -21,8 +23,7 @@ class User extends Model {
         underscored: true,
       },
     )
-    // biome-ignore lint/correctness/noUnreachable: <explanation>
-    return this;
+    
   }
 }
 

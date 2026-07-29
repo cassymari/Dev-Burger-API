@@ -1,105 +1,135 @@
 import * as Yup from 'yup';
+import { Op } from 'sequelize';
 
 import Category from '../models/Category.js';
 
+import { uploadImageToCloudinary } from '../../service/cloudinaryUpload.js';
 
 class CategoryController {
   async store(request, response) {
     const schema = Yup.object({
       name: Yup.string().required(),
-
     });
 
     try {
       schema.validateSync(request.body, {
         abortEarly: false,
       });
-    } catch (err) {
+    } catch (error) {
       return response.status(400).json({
-        error: err.errors,
+        error: error.errors,
       });
     }
 
-
-
-    const { name } = request.body;
-    const { filename } = request.file;
-
-    const existingCategory = await Category.findOne({
-      where: {
-        name,
-
+    try {
+      if (!request.file) {
+        return response.status(400).json({
+          error: 'Envie uma imagem para a categoria.',
+        });
       }
-    })
 
-    if (existingCategory) {
-      return response.status(400).json({ error: 'category already exists' });
+      const { name } = request.body;
+
+      const existingCategory = await Category.findOne({
+        where: {
+          name,
+        },
+      });
+
+      if (existingCategory) {
+        return response.status(400).json({
+          error: 'Essa categoria já existe.',
+        });
+      }
+
+      const uploadResult = await uploadImageToCloudinary(
+        request.file.buffer,
+        'devburger/categories',
+      );
+
+      const category = await Category.create({
+        name,
+        path: uploadResult.secure_url,
+      });
+
+      return response.status(201).json(category);
+    } catch (error) {
+      console.error('ERRO AO CRIAR CATEGORIA:', error);
+
+      return response.status(500).json({
+        message: 'Não foi possível cadastrar a categoria.',
+      });
     }
-
-
-
-    await Category.create({
-      name,
-      path: filename,
-
-    });
-
-    return response.status(201).json();
   }
 
   async update(request, response) {
     const schema = Yup.object({
       name: Yup.string(),
-
     });
 
     try {
       schema.validateSync(request.body, {
         abortEarly: false,
       });
-    } catch (err) {
+    } catch (error) {
       return response.status(400).json({
-        error: err.errors,
+        error: error.errors,
       });
     }
 
+    try {
+      const { id } = request.params;
+      const { name } = request.body;
 
+      const category = await Category.findByPk(id);
 
-    const { name } = request.body;
-    const { id } = request.params;
-
-    const category = await Category.findByPk(id);
-
-    let path = category.path;
-    if (request.file) {
-      const { filename } = request.file;
-      path = filename;
-    }
-
-    const existingCategory = await Category.findOne({
-      where: {
-        name,
-
+      if (!category) {
+        return response.status(404).json({
+          message: 'Categoria não encontrada.',
+        });
       }
-    })
 
-    if (existingCategory) {
-      return response.status(400).json({ error: 'category already exists' });
-    }
+      if (name) {
+        const existingCategory = await Category.findOne({
+          where: {
+            name,
+            id: {
+              [Op.ne]: id,
+            },
+          },
+        });
 
-
-
-    await Category.update({
-      name,
-      path,
-
-    }, {
-      where: {
-        id
+        if (existingCategory) {
+          return response.status(400).json({
+            error: 'Essa categoria já existe.',
+          });
+        }
       }
-    });
 
-    return response.status(201).json();
+      let imageUrl = category.path;
+
+      if (request.file) {
+        const uploadResult = await uploadImageToCloudinary(
+          request.file.buffer,
+          'devburger/categories',
+        );
+
+        imageUrl = uploadResult.secure_url;
+      }
+
+      await category.update({
+        name: name ?? category.name,
+        path: imageUrl,
+      });
+
+      return response.status(200).json(category);
+    } catch (error) {
+      console.error('ERRO AO ATUALIZAR CATEGORIA:', error);
+
+      return response.status(500).json({
+        message: 'Não foi possível atualizar a categoria.',
+      });
+    }
   }
 
   async index(_request, response) {
@@ -108,8 +138,7 @@ class CategoryController {
 
       return response.status(200).json(categories);
     } catch (error) {
-      console.error("ERRO CATEGORY:");
-      console.error(error);
+      console.error('ERRO CATEGORY:', error);
 
       return response.status(500).json({
         message: error.message,
@@ -117,7 +146,5 @@ class CategoryController {
     }
   }
 }
-
-
 
 export default new CategoryController();

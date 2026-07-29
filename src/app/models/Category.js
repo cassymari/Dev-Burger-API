@@ -6,12 +6,12 @@ class Category extends Model {
       {
         name: Sequelize.STRING,
         path: Sequelize.STRING,
-        URL:{
-                  type: Sequelize.VIRTUAL,
-                  get(){
-                    return `https://dev-burger-api-1-9g81.onrender.com/products-file/${this.path}`
-                  },
-                },
+        URL: {
+  type: Sequelize.VIRTUAL,
+  get() {
+    return this.path;
+  },
+},
 
       },
     

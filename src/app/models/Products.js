@@ -16,12 +16,12 @@ class Products extends Model {
           defaultValue: true,
         },
 
-        URL: {
-          type: Sequelize.VIRTUAL,
-          get() {
-            return `https://dev-burger-api-1-9g81.onrender.com/category-file/${this.path}`
-          },
-        },
+       URL: {
+  type: Sequelize.VIRTUAL,
+  get() {
+    return this.path;
+  },
+},
       },
       {
         sequelize,

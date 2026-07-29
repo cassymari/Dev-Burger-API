@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import multer from 'multer';
+import ForgotPasswordController from './app/controlles/ForgotPasswordController.js';
+import ResetPasswordController from './app/controlles/ResetPasswordController.js';
 
 import UserController from './app/controlles/UserController.js';
 import SessionController from './app/controlles/SessionController.js';
@@ -21,6 +23,10 @@ const upload = multer(multerConfig);
 // públicas
 routes.post('/users', UserController.store);
 routes.post('/sessions', SessionController.store);
+
+routes.post('/forgot-password', ForgotPasswordController.store);
+routes.post('/reset-password', ResetPasswordController.store);
+
 routes.get('/products', ProductController.index);
 routes.get('/categories', CategoryController.index);
 
@@ -31,7 +37,7 @@ routes.use(authMiddleware);
 routes.post('/products', adminMiddleware, upload.single('file'), ProductController.store);
 routes.put('/products/:id', adminMiddleware, upload.single('file'), ProductController.update);
 routes.delete("/products/:id", adminMiddleware, ProductController.delete);
-routes.put('/products/:id/restore', ProductController.restore);
+routes.put('/products/:id/restore', adminMiddleware, ProductController.restore);
 
 // categorias
 routes.post('/categories', adminMiddleware, upload.single('file'), CategoryController.store);
